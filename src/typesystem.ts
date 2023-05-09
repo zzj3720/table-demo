@@ -123,7 +123,7 @@ export class Typesystem {
         return trait;
     }
 
-    defineFunction<Args extends TType[], RT extends TType>(name: string, type: FunctionTypeDefine<Args, RT>, impl: FunctionTypeFromFunctionDefine<Args, RT>) {
+    defineFunction<Args extends TType[], RT extends TType>(name: string, type: FunctionTypeDefine<Args, RT>, impl: AnyFn) {
         const id = nanoid();
         const func: FunctionDefine = {
             id,
@@ -235,7 +235,7 @@ export const tURL = typesystem.defineTrait('URL', [tString, tUnknown])
 export const tEmail = typesystem.defineTrait('Email', [tString, tUnknown])
 export const tPhone = typesystem.defineTrait('Phone', [tString, tUnknown])
 
-export const InputRenderList: { type: TType, render: DefineComponent }[] = [];
+export const InputRenderList: { type: TType, render: any }[] = [];
 InputRenderList.push({type: tBoolean, render: BooleanInput})
 InputRenderList.push({type: tDate, render: DateInput})
 InputRenderList.push({type: tURL, render: StringInput})

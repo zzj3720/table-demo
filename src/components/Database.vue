@@ -37,6 +37,9 @@ const clear = () => {
     localStorage.removeItem('functionMap')
     location.reload();
 }
+const selectType = (key: string, func: FunctionDefine, i: number) => {
+    key === 'void' ? func.args.splice(i, 1) : func.args[i] = typesystem.getTypeMap()[key]
+}
 </script>
 <template>
     <div style="display:flex;">
@@ -71,7 +74,7 @@ const clear = () => {
                                 (<span v-for="(i) in [0,1]">{{ i !== 0 ? ', ' : '' }}<NDropdown trigger="click"
                                                                                                 placement="bottom-start"
                                                                                                 size="small"
-                                                                                                @select="key=>key==='void'?func.args.splice(i,1):func.args[i]=typesystem.getTypeMap()[key]"
+                                                                                                @select="(key:string)=>selectType(key,func,i)"
                                                                                                 :options="[{title:'void'},...typesystem.getTypes()].map(v=>({label:v.title,key:v.title}))"><span
                                     style="cursor: pointer;padding: 2px 8px;background-color: white;border-radius: 4px;white-space: nowrap; ">{{
                                 func.args[i]?.title ?? 'void'

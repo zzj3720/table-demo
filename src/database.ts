@@ -33,7 +33,7 @@ export type Filter = SingleFilter | FilterGroup;
 type ColumnFormat = {
     name: string;
     type: TType;
-    render: DefineComponent;
+    render: any;
 };
 export const ColumnFormat = [
     {
@@ -114,7 +114,7 @@ export type Database = {
 }
 type ViewMeta = {
     type: string;
-    render: DefineComponent
+    render: any
 }
 export const Views: Record<string, ViewMeta> = {
     Table: {

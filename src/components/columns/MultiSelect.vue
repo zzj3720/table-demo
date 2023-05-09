@@ -2,10 +2,7 @@
     <div>Multiple select</div>
 </template>
 
-<script>
-export default {
-    name: "MultiSelect"
-}
+<script lang="ts" setup>
 </script>
 
 <style scoped>

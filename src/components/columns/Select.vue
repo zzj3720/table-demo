@@ -2,10 +2,7 @@
 
 </template>
 
-<script>
-export default {
-    name: "Select"
-}
+<script lang="ts" setup>
 </script>
 
 <style scoped>

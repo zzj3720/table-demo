@@ -1,0 +1,16 @@
+body {
+    font-family: Helvetica Neue, Helvetica, Arial, Microsoft Yahei,
+    Hiragino Sans GB, Heiti SC, WenQuanYi Micro Hei, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400;
+    src: local("JetBrains Mono Regular"), local("JetBrainsMono-Regular"), url(https://cdn.jsdelivr.net/npm/jetbrains-mono@1.0.6/fonts/webfonts/JetBrainsMono-Regular.woff2) format("woff2");
+    font-display: swap
+}

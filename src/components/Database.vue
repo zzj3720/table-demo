@@ -1,19 +1,29 @@
 <script setup lang="ts">
 import {ColumnMap, createColumn, Database, typeToString, View, Views} from "../database";
 import {createVars, initFilterGroup} from "../utils/vars";
-import {useStorageAsync} from "@vueuse/core";
+import {useLocalStorage, useStorageAsync} from "@vueuse/core";
 import {FunctionDefine, initFunction, tBoolean, Typesystem, typesystem} from "../typesystem";
 import {NButton, NDropdown, NInput} from 'naive-ui'
 
+const clear = () => {
+    localStorage.removeItem('database');
+    localStorage.removeItem('functionMap')
+    location.reload();
+}
 const fake = new Typesystem()
 initFunction(fake)
 const functionMap = useStorageAsync<Record<string, FunctionDefine>>('functionMap', fake.functionMap)
+const version = useLocalStorage('version', 0);
+if (version.value === 0) {
+    version.value = 1;
+    clear();
+}
 typesystem.setFunctionMap(functionMap);
 const initDatabase = (): Database => {
     const initColumn = [
         createColumn('Name', 'Text'),
-        createColumn('Status', 'Select',['To Do','In Progress','Done']),
-        createColumn('Tags', 'Multi-Select',['Group1','Group2','Group3','Group4','Group5']),
+        createColumn('Status', 'Select', ['To Do', 'In Progress', 'Done']),
+        createColumn('Tags', 'Multi-Select', ['Group1', 'Group2', 'Group3', 'Group4', 'Group5']),
         createColumn('Age', 'Number'),
         createColumn('Birthday', 'Date'),
     ];
@@ -34,11 +44,6 @@ const initDatabase = (): Database => {
     }
 }
 const database = useStorageAsync('database', initDatabase())
-const clear = () => {
-    localStorage.removeItem('database');
-    localStorage.removeItem('functionMap')
-    location.reload();
-}
 const selectType = (key: string, func: FunctionDefine, i: number) => {
     key === 'void' ? func.type.args.splice(i, 1) : func.type.args[i] = typesystem.getTypeMap()[key]
 }
@@ -73,7 +78,9 @@ const selectType = (key: string, func: FunctionDefine, i: number) => {
                             </div>
                             <div v-if="func.type.typeVars">
                                 type variables:
-                                {{func.type.typeVars?.map(v => `${v.name} extends ${typeToString(v.bound)}`).join(', ')}}
+                                {{
+                                func.type.typeVars?.map(v => `${v.name} extends ${typeToString(v.bound)}`).join(', ')
+                                }}
                             </div>
                             <div style="margin-bottom: 4px;">
                                 type:

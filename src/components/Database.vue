@@ -12,6 +12,8 @@ typesystem.setFunctionMap(functionMap);
 const initDatabase = (): Database => {
     const initColumn = [
         createColumn('Name', 'Text'),
+        createColumn('Status', 'Select',['To Do','In Progress','Done']),
+        createColumn('Tags', 'Multi-Select',['Group1','Group2','Group3','Group4','Group5']),
         createColumn('Age', 'Number'),
         createColumn('Birthday', 'Date'),
     ];
@@ -38,7 +40,7 @@ const clear = () => {
     location.reload();
 }
 const selectType = (key: string, func: FunctionDefine, i: number) => {
-    key === 'void' ? func.args.splice(i, 1) : func.args[i] = typesystem.getTypeMap()[key]
+    key === 'void' ? func.type.args.splice(i, 1) : func.type.args[i] = typesystem.getTypeMap()[key]
 }
 </script>
 <template>
@@ -69,6 +71,10 @@ const selectType = (key: string, func: FunctionDefine, i: number) => {
                                 <NInput v-model:value="func.name" size="small"
                                         style="margin-bottom: 4px;max-width: 200px"></NInput>
                             </div>
+                            <div v-if="func.type.typeVars">
+                                type variables:
+                                {{func.type.typeVars?.map(v => `${v.name} extends ${typeToString(v.bound)}`).join(', ')}}
+                            </div>
                             <div style="margin-bottom: 4px;">
                                 type:
                                 (<span v-for="(i) in [0,1]">{{ i !== 0 ? ', ' : '' }}<NDropdown trigger="click"
@@ -77,10 +83,10 @@ const selectType = (key: string, func: FunctionDefine, i: number) => {
                                                                                                 @select="(key:string)=>selectType(key,func,i)"
                                                                                                 :options="[{title:'void'},...typesystem.getTypes()].map(v=>({label:v.title,key:v.title}))"><span
                                     style="cursor: pointer;padding: 2px 8px;background-color: white;border-radius: 4px;white-space: nowrap; ">{{
-                                func.args[i]?.title ?? 'void'
+                                func.type.args[i] ? typeToString(func.type.args[i]) : 'void'
                                 }}</span></NDropdown>
                             </span>) ->
-                                <span>{{ typeToString(func.rt) }}</span>
+                                <span>{{ typeToString(func.type.rt) }}</span>
                             </div>
                             <div style="display:flex;align-items:center;">
                                 impl:

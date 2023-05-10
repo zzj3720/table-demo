@@ -13,7 +13,7 @@
                                      :options="ColumnFormat.map(v=>({label:v.name,value:v.name}))"></PlainSelect>
                     </span>
                     <span style="color: gray;margin-right: 8px;">
-                        {{ typeToString(getFormat(columnMap[column.id].format).type) }}
+                        {{ typeToString(getFormat(columnMap[column.id].format).type(columnMap[column.id].data)) }}
                     </span>
                     <NSwitch style="margin-right: 8px;" size="small" v-model:value="column.show">
                         <template #checked>
@@ -70,7 +70,8 @@
                             class="cell-border cell-body"
                     >
                         <component
-                                :is="ColumnFormat.find(v=>v.name===columnMap[id].format).render"
+                                :is="ColumnFormat.find(v=>v.name===columnMap[id].format).cellRender"
+                                v-model:data="columnMap[id].data"
                                 v-model:value="row[id]"
                         ></component>
                     </div>

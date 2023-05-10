@@ -4,7 +4,7 @@ import {notNullish} from "@vueuse/core";
 
 export const initFilter = (vars: Variable[]): Filter => {
     const {name, type} = vars[0];
-    const id = typesystem.getMethods(type, tBoolean)[0].id
+    const id = typesystem.getMethods(type, tBoolean())[0].id
     return {
         type: 'filter',
         left: {type: 'ref', name},
@@ -17,7 +17,7 @@ export const initFilterGroup = (vars: Variable[]): FilterGroup => {
 }
 export const createVars = (columnMap: ColumnMap) => {
     return Object.values(columnMap).map(column => {
-        const type = getFormat(column.format)?.type;
+        const type = getFormat(column.format)?.type(column.data);
         if (!type) {
             return
         }

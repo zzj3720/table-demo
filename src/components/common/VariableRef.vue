@@ -4,9 +4,8 @@
             <PlainSelect :value="refName" @update:value="setRefName" :options="options"></PlainSelect>
         </div>
         <div v-if="propertyOptions?.length" style="display:flex;align-items:center;">
-            <span style="margin-right: 4px;">{{propertyName&&'\'s'}}</span>
-            <PlainSelect :value="propertyName" @update:value="setPropertyName" :options="propertyOptions">⋮
-            </PlainSelect>
+            <span style="margin-right: 4px;">{{ propertyName && '\'s' }}</span>
+            <PlainSelect :value="propertyName" @update:value="setPropertyName" :options="propertyOptions"></PlainSelect>
         </div>
     </div>
 </template>
@@ -40,7 +39,7 @@ const setRefName = (name: string) => {
     }
 }
 const options = computed(() => {
-    return props.vars.map(value => ({label: value.name, value: value.name}))
+    return props.vars.map(value => ({label: value.name, value: value.id}))
 })
 const propertyName = computed(() => {
     if (dataModel.value.type === "ref") {
@@ -61,11 +60,10 @@ const setPropertyName = (name: string) => {
 }
 const properties = computed(() => {
     const name = refName.value
-    const value = props.vars.find(v => v.name === name);
+    const value = props.vars.find(v => v.id === name);
     if (!value) {
         return
     }
-    console.log(value.type,name)
     return typesystem.getProperties(value.type)
 })
 const propertyOptions = computed(() => {

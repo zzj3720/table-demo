@@ -3,7 +3,7 @@
                :options="props.options?.map(v=>({label:v.label,key:v.key??v.value}))">
         <span style="cursor: pointer;background-color: white;border-radius: 4px;white-space: nowrap; ">
             <slot v-if="!label">
-                None
+                ⋮
             </slot>
             <span style="padding: 2px 8px" v-else>
                 {{ label }}

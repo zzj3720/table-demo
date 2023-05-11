@@ -56,7 +56,7 @@ export const tBoolean = (literal?: boolean): TBoolean => ({
     literal,
 })
 
-interface TUnion {
+export interface TUnion {
     type: 'union';
     title: 'union';
     list: TType[];
@@ -129,7 +129,6 @@ interface TraitType {
 
 export type FunctionDefine = {
     name: string;
-    id: string;
     type: FunctionTypeDefine;
     staticType: FunctionTypeDefine;
     impl: AnyFn
@@ -173,36 +172,30 @@ export class Typesystem {
     }
 
     defineFunction<Args extends TType[], RT extends TType>(name: string, type: FunctionTypeDefine<Args, RT>, impl: AnyFn) {
-        const id = nanoid();
         const staticType = this.subst(Object.fromEntries(type.typeVars?.map(v => [v.name, v.bound]) ?? []), type);
         const func: FunctionDefine = {
-            id,
             name,
             type,
             staticType,
             impl,
         }
-        this.functionMap[id] = func
+        this.functionMap[name] = func
     }
 
     defineProperty<Arg extends TType, RT extends TType>(name: string, type: FunctionTypeDefine, impl: FunctionTypeFromFunctionDefine<[Arg]>) {
-        const id = nanoid();
         const staticType = this.subst(Object.fromEntries(type.typeVars?.map(v => [v.name, v.bound]) ?? []), type);
         const property: FunctionDefine = {
-            id,
             name,
             type,
             staticType,
             impl,
         }
-        this.propertyMap[id] = property;
+        this.propertyMap[name] = property;
     }
 
     getProperties(self: TType): FunctionDefine[] {
         const result: FunctionDefine[] = [];
-        console.log(this.propertyMap)
         for (const property of Object.values(this.propertyMap)) {
-            console.log(property.staticType.args[0], self)
             if (this.isSubtype(property.staticType.args[0], self)) {
                 result.push(property)
             }
@@ -366,6 +359,11 @@ export class Typesystem {
         console.log(ctx)
         return this.subst(ctx, template)
     }
+
+    getPropertyFunc(propertyFuncName: string) {
+        console.log(this.propertyMap)
+        return this.propertyMap[propertyFuncName]
+    }
 }
 
 export const typesystem = new Typesystem();
@@ -374,6 +372,7 @@ export const tURL = typesystem.defineTrait('URL', [tString(), tUnknown()])
 export const tEmail = typesystem.defineTrait('Email', [tString(), tUnknown()])
 export const tPhone = typesystem.defineTrait('Phone', [tString(), tUnknown()])
 export const InputRenderList: { type: TType, render: any }[] = [];
+InputRenderList.push({type: tUnion([tUnknown()]), render: UnionInput})
 InputRenderList.push({type: tBoolean(), render: BooleanInput})
 InputRenderList.push({type: tDate, render: DateInput})
 InputRenderList.push({type: tURL, render: StringInput})
@@ -381,148 +380,164 @@ InputRenderList.push({type: tPhone, render: StringInput})
 InputRenderList.push({type: tEmail, render: StringInput})
 InputRenderList.push({type: tNumber(), render: NumberInput})
 InputRenderList.push({type: tString(), render: StringInput})
-InputRenderList.push({type: tUnion([]), render: UnionInput})
 InputRenderList.push({type: tArray(tUnknown()), render: ArrayInput})
 export const getRenderByType = (type: TType) => {
-    return InputRenderList.find(v => typesystem.isSubtype(v.type, type))?.render
+    return InputRenderList.find(v => {
+        // if()
+        let b = typesystem.isSubtype(v.type, type);
+        console.log(v.type, type, b)
+        return b
+    })?.render
 }
-export const initFunction = (typesystem: Typesystem) => {
-    typesystem.defineFunction('Is empty', {args: [tUnknown()], rt: tBoolean()}, (value) => {
-        return value == null;
-    })
-    typesystem.defineFunction('Is not empty', {args: [tUnknown()], rt: tBoolean()}, (value) => {
-        return value == null;
-    })
-    typesystem.defineFunction('Is', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'string' && value == target;
-    })
-    typesystem.defineFunction('Is not', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'string' && value != target;
-    })
-    typesystem.defineFunction('Contains', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'string' && value.includes(target);
-    })
-    typesystem.defineFunction('Does no contains', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'string' && !value.includes(target);
-    })
-    typesystem.defineFunction('Starts with', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'string' && value.startsWith(target);
-    })
-    typesystem.defineFunction('Ends with', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'string' && value.endsWith(target);
-    })
-    typesystem.defineFunction('Characters less than', {
-        args: [tString(), tNumber()],
-        rt: tBoolean()
-    }, (value, target) => {
-        return typeof value === 'string' && value.length < target;
-    })
-    typesystem.defineFunction('>', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'number' && value > target;
-    })
-    typesystem.defineFunction('>=', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'number' && value >= target;
-    })
-    typesystem.defineFunction('<', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'number' && value < target;
-    })
-    typesystem.defineFunction('<=', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'number' && value <= target;
-    })
-    typesystem.defineFunction('==', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'number' && value == target;
-    })
-    typesystem.defineFunction('!=', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'number' && value != target;
-    })
-    typesystem.defineFunction('Is', {args: [tDate, tDate], rt: tBoolean()}, (value, target) => {
-        return typeof value === 'number' && value == target;
-    })
-    typesystem.defineFunction('Is inside', {
-        typeVars: [tTypeVar('options', tUnion([tString()]))],
-        args: [tTypeRef('options'), tArray(tTypeRef('options'))],
-        rt: tBoolean()
-    }, (value, target) => {
-        return Array.isArray(target) && target.includes(value);
-    })
-    typesystem.defineFunction('Is not inside', {
-        typeVars: [tTypeVar('options', tUnion([tString()]))],
-        args: [tTypeRef('options'), tArray(tTypeRef('options'))],
-        rt: tBoolean()
-    }, (value, target) => {
-        return Array.isArray(target) && !target.includes(value);
-    })
-    typesystem.defineFunction('Contains all', {
-        typeVars: [tTypeVar('options', tUnion([tString()]))],
-        args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
-        rt: tBoolean()
-    }, (value, target) => {
-        return Array.isArray(target) && Array.isArray(value) && target.every(v => value.includes(v));
-    })
-    typesystem.defineFunction('Contains one of', {
-        typeVars: [tTypeVar('options', tUnion([tString()]))],
-        args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
-        rt: tBoolean()
-    }, (value, target) => {
-        return Array.isArray(target) && Array.isArray(value) && target.some(v => value.includes(v));
-    })
-    typesystem.defineFunction('Does not contains one of', {
-        typeVars: [tTypeVar('options', tUnion([tString()]))],
-        args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
-        rt: tBoolean()
-    }, (value, target) => {
-        return Array.isArray(target) && Array.isArray(value) && target.every(v => !value.includes(v));
-    })
-    typesystem.defineFunction('Does not contains all', {
-        typeVars: [tTypeVar('options', tUnion([tString()]))],
-        args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
-        rt: tBoolean()
-    }, (value, target) => {
-        return Array.isArray(target) && Array.isArray(value) && !target.every(v => value.includes(v));
-    })
-    typesystem.defineProperty('Length', {
-        args: [tString()],
-        rt: tNumber()
-    }, (value) => {
-        if (typeof value !== 'string') {
-            return 0;
-        }
-        return value.length;
-    })
-    typesystem.defineProperty('Day of month', {
-        args: [tDate],
-        rt: tNumber()
-    }, (value) => {
-        if (typeof value !== 'number') {
-            return 0;
-        }
-        return new Date(value).getDate();
-    })
-    typesystem.defineProperty('Day of week', {
-        args: [tDate],
-        rt: tNumber()
-    }, (value) => {
-        if (typeof value !== 'number') {
-            return 0;
-        }
-        return new Date(value).getDay();
-    })
-    typesystem.defineProperty('Month of year', {
-        args: [tDate],
-        rt: tNumber()
-    }, (value) => {
-        if (typeof value !== 'number') {
-            return 0;
-        }
-        return new Date(value).getMonth() + 1;
-    })
-    typesystem.defineProperty('Size', {
-        args: [tArray(tUnknown())],
-        rt: tNumber()
-    }, (value) => {
-        if (!Array.isArray(value)) {
-            return 0;
-        }
-        return value.length;
-    })
-}
+typesystem.defineFunction('Is empty', {args: [tUnknown()], rt: tBoolean()}, (value) => {
+    return value == null;
+})
+typesystem.defineFunction('Is not empty', {args: [tUnknown()], rt: tBoolean()}, (value) => {
+    return value != null;
+})
+typesystem.defineFunction('Is', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'string' && value == target;
+})
+typesystem.defineFunction('Is not', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'string' && value != target;
+})
+typesystem.defineFunction('Contains', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'string' && value.includes(target);
+})
+typesystem.defineFunction('Does no contains', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'string' && !value.includes(target);
+})
+typesystem.defineFunction('Starts with', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'string' && value.startsWith(target);
+})
+typesystem.defineFunction('Ends with', {args: [tString(), tString()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'string' && value.endsWith(target);
+})
+typesystem.defineFunction('Characters less than', {
+    args: [tString(), tNumber()],
+    rt: tBoolean()
+}, (value, target) => {
+    return typeof value === 'string' && value.length < target;
+})
+typesystem.defineFunction('>', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'number' && value > target;
+})
+typesystem.defineFunction('>=', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'number' && value >= target;
+})
+typesystem.defineFunction('<', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'number' && value < target;
+})
+typesystem.defineFunction('<=', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'number' && value <= target;
+})
+typesystem.defineFunction('==', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'number' && value == target;
+})
+typesystem.defineFunction('!=', {args: [tNumber(), tNumber()], rt: tBoolean()}, (value, target) => {
+    return typeof value === 'number' && value != target;
+})
+// typesystem.defineFunction('Is', {args: [tDate, tDate], rt: tBoolean()}, (value, target) => {
+//     return typeof value === 'number' && value == target;
+// })
+typesystem.defineFunction('Is before', {
+    args: [tDate, tUnion([
+        tString('Today'),
+        tString('Yesterday'),
+        tString('2 days ago'),
+        tString('3 days ago'),
+        tString('4 days ago'),
+        tString('5 days ago'),
+        tString('Last week'),
+    ])],
+    rt: tBoolean()
+}, (value, target) => {
+    return typeof value === 'number' && value == target;
+})
+typesystem.defineFunction('Is inside', {
+    typeVars: [tTypeVar('options', tUnion([tString()]))],
+    args: [tTypeRef('options'), tArray(tTypeRef('options'))],
+    rt: tBoolean()
+}, (value, target) => {
+    return Array.isArray(target) && target.includes(value);
+})
+typesystem.defineFunction('Is not inside', {
+    typeVars: [tTypeVar('options', tUnion([tString()]))],
+    args: [tTypeRef('options'), tArray(tTypeRef('options'))],
+    rt: tBoolean()
+}, (value, target) => {
+    return Array.isArray(target) && !target.includes(value);
+})
+typesystem.defineFunction('Contains all', {
+    typeVars: [tTypeVar('options', tUnion([tString()]))],
+    args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
+    rt: tBoolean()
+}, (value, target) => {
+    return Array.isArray(target) && Array.isArray(value) && target.every(v => value.includes(v));
+})
+typesystem.defineFunction('Contains one of', {
+    typeVars: [tTypeVar('options', tUnion([tString()]))],
+    args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
+    rt: tBoolean()
+}, (value, target) => {
+    return Array.isArray(target) && Array.isArray(value) && target.some(v => value.includes(v));
+})
+typesystem.defineFunction('Does not contains one of', {
+    typeVars: [tTypeVar('options', tUnion([tString()]))],
+    args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
+    rt: tBoolean()
+}, (value, target) => {
+    return Array.isArray(target) && Array.isArray(value) && target.every(v => !value.includes(v));
+})
+typesystem.defineFunction('Does not contains all', {
+    typeVars: [tTypeVar('options', tUnion([tString()]))],
+    args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
+    rt: tBoolean()
+}, (value, target) => {
+    return Array.isArray(target) && Array.isArray(value) && !target.every(v => value.includes(v));
+})
+typesystem.defineProperty('Length', {
+    args: [tString()],
+    rt: tNumber()
+}, (value) => {
+    if (typeof value !== 'string') {
+        return 0;
+    }
+    return value.length;
+})
+typesystem.defineProperty('Day of month', {
+    args: [tDate],
+    rt: tNumber()
+}, (value) => {
+    if (typeof value !== 'number') {
+        return 0;
+    }
+    return new Date(value).getDate();
+})
+typesystem.defineProperty('Day of week', {
+    args: [tDate],
+    rt: tNumber()
+}, (value) => {
+    if (typeof value !== 'number') {
+        return 0;
+    }
+    return new Date(value).getDay();
+})
+typesystem.defineProperty('Month of year', {
+    args: [tDate],
+    rt: tNumber()
+}, (value) => {
+    if (typeof value !== 'number') {
+        return 0;
+    }
+    return new Date(value).getMonth() + 1;
+})
+typesystem.defineProperty('Size', {
+    args: [tArray(tUnknown())],
+    rt: tNumber()
+}, (value) => {
+    if (!Array.isArray(value)) {
+        return 0;
+    }
+    return value.length;
+})

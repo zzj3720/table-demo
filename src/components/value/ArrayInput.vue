@@ -13,8 +13,8 @@ const props = defineProps<{
     type: TArray;
 }>();
 const options = computed(() => {
-    console.log(props.type);
     const ele = props.type.ele;
+    console.log(props.type)
     if (ele.type !== 'union') {
         return
     }

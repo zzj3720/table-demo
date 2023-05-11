@@ -9,7 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/mockjs": "^1.0.7",
     "@vueuse/core": "^10.1.2",
+    "mockjs": "^1.1.0",
     "naive-ui": "^2.34.3",
     "nanoid": "^4.0.2",
     "vue": "^3.2.45"

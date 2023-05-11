@@ -57,26 +57,28 @@
                             :style="`width:${width}px;`"
                             class="cell-border cell-head"
                     >
-                        {{columnMap[id].name}}
+                        {{ columnMap[id].name }}
                     </div>
                 </template>
 
             </div>
-            <div v-for="(row,i) in props.rows" :key="i" style="display: flex" class="row-border row-body">
-                <template v-for="({id,width,show}) in showColumns" :key="id">
-                    <div
-                            v-if="show"
-                            :style="`width:${width}px;`"
-                            class="cell-border cell-body"
-                    >
-                        <component
-                                :is="ColumnFormat.find(v=>v.name===columnMap[id].format).cellRender"
-                                v-model:data="columnMap[id].data"
-                                v-model:value="row[id]"
-                        ></component>
-                    </div>
-                </template>
-            </div>
+            <template v-for="(row,i) in props.rows" :key="i">
+                <div v-if="evalFilter(view.filter,row)" style="display: flex" class="row-border row-body">
+                    <template v-for="({id,width,show}) in showColumns" :key="id">
+                        <div
+                                v-if="show"
+                                :style="`width:${width}px;`"
+                                class="cell-border cell-body"
+                        >
+                            <component
+                                    :is="ColumnFormat.find(v=>v.name===columnMap[id].format).cellRender"
+                                    v-model:data="columnMap[id].data"
+                                    v-model:value="row[id]"
+                            ></component>
+                        </div>
+                    </template>
+                </div>
+            </template>
         </div>
     </div>
 </template>
@@ -85,7 +87,7 @@
 import {
     Column,
     ColumnFormat,
-    ColumnMap,
+    ColumnMap, evalFilter,
     getFormat,
     Row,
     TableView,

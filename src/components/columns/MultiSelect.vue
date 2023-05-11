@@ -4,6 +4,7 @@
             v-model:value="valueModel"
             filterable
             tag
+            max-tag-count="responsive"
             multiple
             @update:value="select"
             @create="createTag"

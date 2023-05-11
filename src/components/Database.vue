@@ -69,15 +69,17 @@ const selectType = (key: string, func: FunctionDefine, i: number) => {
             </div>
             <div>
                 <div style="font-weight: bold">Filter Functions</div>
-                <div v-for="(func) in typesystem.getFunctions()"
-                     style="margin-bottom: 12px;font-family: 'JetBrains Mono',serif;padding: 8px;background: rgba(0,0,0,0.05);border-radius: 4px">
-                    {{ `${func.name}` }}<span v-if="func.type.typeVars?.length">{{
-                    `<${func.type.typeVars?.map(v => `${v.name} extends ${typeToString(v.bound)}`).join(', ')}>`
-                    }}</span>{{
-                    `(${func.type.args.map(type => typeToString(type)).join(', ')})`
-                    }}
-                    {{ ' => ' }}
-                    {{ typeToString(func.type.rt) }}
+                <div style="font-size:12px;margin-bottom: 12px;font-family: 'JetBrains Mono',serif;padding: 8px;background: rgba(0,0,0,0.05);border-radius: 4px">
+                    <div v-for="(func) in typesystem.getFunctions()"
+                         style="">
+                        {{ `${func.name}` }}<span v-if="func.type.typeVars?.length">{{
+                            `<${func.type.typeVars?.map(v => `${v.name} extends ${typeToString(v.bound)}`).join(', ')}>`
+                        }}</span>{{
+                            `(${func.type.args.map(type => typeToString(type)).join(', ')})`
+                        }}
+                        {{ ' => ' }}
+                        {{ typeToString(func.type.rt) }}
+                    </div>
                 </div>
             </div>
         </div>

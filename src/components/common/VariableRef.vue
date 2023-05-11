@@ -65,6 +65,7 @@ const properties = computed(() => {
     if (!value) {
         return
     }
+    console.log(value.type,name)
     return typesystem.getProperties(value.type)
 })
 const propertyOptions = computed(() => {

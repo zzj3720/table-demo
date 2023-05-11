@@ -1,5 +1,5 @@
 import {AnyFn} from "@vueuse/core";
-import {ref, Ref, toRaw} from "vue";
+import {ref, Ref} from "vue";
 import BooleanInput from "./components/value/BooleanInput.vue";
 import DateInput from "./components/value/DateInput.vue";
 import NumberInput from "./components/value/NumberInput.vue";
@@ -122,7 +122,7 @@ type FunctionTypeFromFunctionDefine<Args extends any[]> = (...args: { [K in keyo
 
 interface TraitType {
     type: 'Trait'
-    name: symbol;
+    name: string;
     title: string;
     merge: TType[],
 }
@@ -146,7 +146,7 @@ export type DefineConfig = {
 }
 
 export class Typesystem {
-    traitMap = new Map<symbol, TraitType>();
+    traitMap = new Map<string, TraitType>();
     define: Ref<DefineConfig> = ref({function: {}, property: {}})
 
     setFunctionMap(defineConfig: Ref<DefineConfig>) {
@@ -162,14 +162,13 @@ export class Typesystem {
     }
 
     defineTrait(name: string, merge: TType[]): TraitType {
-        const symbol = Symbol(name);
         const trait: TraitType = {
             type: 'Trait',
-            name: symbol,
+            name: name,
             title: name,
             merge: merge,
         };
-        this.traitMap.set(symbol, trait);
+        this.traitMap.set(name, trait);
         return trait;
     }
 
@@ -506,6 +505,15 @@ export const initFunction = (typesystem: Typesystem) => {
     })
     typesystem.defineProperty('Month of year', {
         args: [tDate],
+        rt: tNumber()
+    }, (value) => {
+        if (typeof value !== 'string') {
+            return 0;
+        }
+        return value.length;
+    })
+    typesystem.defineProperty('Size', {
+        args: [tArray(tUnknown())],
         rt: tNumber()
     }, (value) => {
         if (typeof value !== 'string') {

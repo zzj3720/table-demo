@@ -9,28 +9,44 @@ import Select from "./components/columns/Select.vue";
 import {notNullish} from "@vueuse/core";
 import MultiSelect from "./components/columns/MultiSelect.vue";
 
+
 export type Variable = { name: string; type: TType };
 export type FilterGroup = {
     type: 'group'
     op: 'and' | 'or';
     conditions: Filter[];
 }
-export type FilterRef = {
+export type VariableRef = {
     type: 'ref';
     name: string;
 }
+
+export type Property = {
+    type: 'property';
+    ref: VariableRef;
+    propertyFuncName: string;
+}
+
+export type VariableOrProperty = VariableRef | Property;
+
 export type Literal = {
     type: 'literal';
     value: unknown;
 }
-export type Value = FilterRef | Literal;
+export type Value = VariableRef | Literal;
 export type SingleFilter = {
     type: 'filter'
-    left: FilterRef;
+    left: VariableOrProperty;
     function: string;
     args: Value[]
 }
 export type Filter = SingleFilter | FilterGroup;
+export type SortExp = {
+    left: VariableOrProperty;
+    type: 'asc' | 'desc';
+}
+
+export type SortGroup = SortExp[]
 
 type ColumnFormat = {
     name: string;
@@ -105,6 +121,7 @@ export type TableViewColumn = {
 export type TableView = {
     columns: TableViewColumn[]
     filter: FilterGroup;
+    sort: SortGroup;
     fixed: number;
 } & View
 

@@ -140,14 +140,25 @@ type PropertyDefine = {
     rt: TType;
     impl: AnyFn
 }
+export type DefineConfig = {
+    function: Record<string, FunctionDefine>;
+    property: Record<string, FunctionDefine>;
+}
 
 export class Typesystem {
     traitMap = new Map<symbol, TraitType>();
-    functionMap: Ref<Record<string, FunctionDefine>> = ref({});
-    propertyMap = new Map<string, PropertyDefine>();
+    define: Ref<DefineConfig> = ref({function: {}, property: {}})
 
-    setFunctionMap(map: Ref<Record<string, FunctionDefine>>) {
-        this.functionMap = map;
+    setFunctionMap(defineConfig: Ref<DefineConfig>) {
+        this.define = defineConfig;
+    }
+
+    get functionMap() {
+        return this.define.value.function
+    }
+
+    get propertyMap() {
+        return this.define.value.property
     }
 
     defineTrait(name: string, merge: TType[]): TraitType {
@@ -172,23 +183,28 @@ export class Typesystem {
             staticType,
             impl: impl.toString(),
         }
-        this.functionMap.value[id] = func
+        this.functionMap[id] = func
     }
 
-    defineProperty<Arg extends TType, RT extends TType>(name: string, arg: Arg, ret: RT, impl: FunctionTypeFromFunctionDefine<[Arg]>) {
-        const property: PropertyDefine = {
+    defineProperty<Arg extends TType, RT extends TType>(name: string, type: FunctionTypeDefine, impl: FunctionTypeFromFunctionDefine<[Arg]>) {
+        const id = nanoid();
+        const staticType = this.subst(Object.fromEntries(type.typeVars?.map(v => [v.name, v.bound]) ?? []), type);
+        const property: FunctionDefine = {
+            id,
             name,
-            self: arg,
-            rt: ret,
-            impl,
+            type,
+            staticType,
+            impl: impl.toString(),
         }
-        this.propertyMap.set(name, property)
+        this.propertyMap[id] = property;
     }
 
-    getProperties(self: TType): PropertyDefine[] {
-        const result: PropertyDefine[] = [];
-        for (const property of this.propertyMap.values()) {
-            if (this.isSubtype(self, property.self)) {
+    getProperties(self: TType): FunctionDefine[] {
+        const result: FunctionDefine[] = [];
+        console.log(this.propertyMap)
+        for (const property of Object.values(this.propertyMap)) {
+            console.log(property.staticType.args[0], self)
+            if (this.isSubtype(property.staticType.args[0], self)) {
                 result.push(property)
             }
         }
@@ -197,7 +213,7 @@ export class Typesystem {
 
     getMethods(self: TType, ret: TType): FunctionDefine[] {
         const result: FunctionDefine[] = [];
-        for (const func of Object.values(this.functionMap.value)) {
+        for (const func of Object.values(this.functionMap)) {
             if (func.staticType.args.length >= 1 && this.isSubtype(func.staticType.args[0], self) && this.isSubtype(ret, func.staticType.rt)) {
                 result.push(func)
             }
@@ -280,7 +296,7 @@ export class Typesystem {
                 return false
             }
             console.log(parent.ele, sub.ele)
-            return parent.type === sub.type && this.isSubtype(parent.ele, sub.ele,context)
+            return parent.type === sub.type && this.isSubtype(parent.ele, sub.ele, context)
         }
         const findParent = (self: TType, target: TType): boolean => {
             if (this.equal(self, target)) {
@@ -309,7 +325,7 @@ export class Typesystem {
     }
 
     getFunctions() {
-        return Object.values(this.functionMap.value)
+        return Object.values(this.define.value.function)
     }
 
     subst(context: Record<string, TType>, template: FunctionTypeDefine): FunctionTypeDefine {
@@ -461,7 +477,37 @@ export const initFunction = (typesystem: Typesystem) => {
     }, (value, target) => {
         return Array.isArray(target) && !target.includes(value);
     })
-    typesystem.defineProperty('Length', tString(), tNumber(), (value) => {
+    typesystem.defineProperty('Length', {
+        args: [tString()],
+        rt: tNumber()
+    }, (value) => {
+        if (typeof value !== 'string') {
+            return 0;
+        }
+        return value.length;
+    })
+    typesystem.defineProperty('Day of month', {
+        args: [tDate],
+        rt: tNumber()
+    }, (value) => {
+        if (typeof value !== 'string') {
+            return 0;
+        }
+        return value.length;
+    })
+    typesystem.defineProperty('Day of week', {
+        args: [tDate],
+        rt: tNumber()
+    }, (value) => {
+        if (typeof value !== 'string') {
+            return 0;
+        }
+        return value.length;
+    })
+    typesystem.defineProperty('Month of year', {
+        args: [tDate],
+        rt: tNumber()
+    }, (value) => {
         if (typeof value !== 'string') {
             return 0;
         }

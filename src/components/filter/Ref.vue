@@ -6,14 +6,14 @@
 </template>
 
 <script lang="ts" setup>
-import {FilterRef, Variable} from "../../database";
+import {VariableRef, Variable} from "../../database";
 import {NSelect} from 'naive-ui'
 import {computed} from "vue";
 import {typesystem} from "../../typesystem";
 import PlainSelect from "../PlainSelect.vue";
 
 const props = defineProps<{
-    data: FilterRef
+    data: VariableRef
     vars: Variable[]
 }>()
 const options = computed(() => {

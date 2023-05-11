@@ -12,7 +12,7 @@
                 </div>
             </div>
             <Condition v-if="filter.type==='filter'" :vars="vars" :data="filter"></Condition>
-            <Group v-else :data="filter" :vars="vars"></Group>
+            <FilterGroupView v-else :data="filter" :vars="vars"></FilterGroupView>
         </div>
         <n-dropdown
                 :options="addNewOptions"
@@ -26,12 +26,11 @@
 </template>
 
 <script lang="ts" setup>
-import {Filter, FilterGroup, Variable} from "../../database";
+import type {Filter, FilterGroup, Variable} from "../../database";
 import Condition from "./Condition.vue";
 import {NButton, NDropdown} from 'naive-ui'
 import PlainSelect from "../PlainSelect.vue";
 import {initFilter, initFilterGroup} from "../../utils/vars";
-
 const map = {
     and: 'And',
     or: 'Or',

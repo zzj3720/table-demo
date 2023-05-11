@@ -1,5 +1,5 @@
 <template>
-    <div style="display: flex;flex-direction: column">
+    <div style="display: flex;flex-direction: column;width: max-content">
         <div style="margin-bottom: 24px;">
             <div style="font-size:20px;font-weight: bold">Columns</div>
             <div style="margin-left: 12px;">
@@ -12,7 +12,7 @@
                         <PlainSelect v-model:value="columnMap[column.id].format"
                                      :options="ColumnFormat.map(v=>({label:v.name,value:v.name}))"></PlainSelect>
                     </span>
-                    <span style="color: gray;margin-right: 8px;">
+                    <span style="color: gray;margin-right: 8px;white-space: nowrap">
                         {{ typeToString(getFormat(columnMap[column.id].format).type(columnMap[column.id].data)) }}
                     </span>
                     <NSwitch style="margin-right: 8px;" size="small" v-model:value="column.show">
@@ -38,13 +38,13 @@
         <div style="margin-bottom: 24px;">
             <div style="font-size:20px;font-weight: bold">Filter</div>
             <div style="margin-left: 12px;">
-                <Group :data="props.view.filter" :vars="vars"></Group>
+                <FilterGroup :data="props.view.filter" :vars="vars"></FilterGroup>
             </div>
         </div>
         <div style="margin-bottom: 24px;">
             <div style="font-size:20px;font-weight: bold">Sort</div>
             <div style="margin-left: 12px;">
-                TODO
+                <sort-group :data="props.view.sort" :vars="vars"></sort-group>
             </div>
         </div>
         <div style="font-size:20px;font-weight: bold">Table</div>
@@ -92,12 +92,13 @@ import {
     TableViewColumn,
     typeToString
 } from "../../database";
-import Group from "../filter/Group.vue";
+import FilterGroup from "../filter/FilterGroupView.vue";
 import {computed} from "vue";
 import {createVars} from "../../utils/vars";
 import {NButton, NDropdown, NInput, NSlider, NSwitch} from 'naive-ui'
 import PlainSelect from "../PlainSelect.vue";
 import {nanoid} from "nanoid";
+import SortGroup from "../sort/SortGroupView.vue";
 
 const props = defineProps<{
     rows: Row[];

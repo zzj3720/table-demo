@@ -2,8 +2,8 @@
 import {ColumnMap, createColumn, Database, TableView, typeToString, View, Views} from "../database";
 import {createVars, initFilterGroup} from "../utils/vars";
 import {useLocalStorage, useStorageAsync} from "@vueuse/core";
-import {DefineConfig, FunctionDefine, initFunction, tBoolean, Typesystem, typesystem} from "../typesystem";
-import {NButton, NDropdown, NInput} from 'naive-ui'
+import {DefineConfig, initFunction, Typesystem, typesystem} from "../typesystem";
+import {NButton} from 'naive-ui'
 
 const clear = () => {
     localStorage.removeItem('database');
@@ -45,16 +45,13 @@ const initDatabase = (): Database => {
     }
 }
 const database = useStorageAsync('database', initDatabase())
-const selectType = (key: string, func: FunctionDefine, i: number) => {
-    key === 'void' ? func.type.args.splice(i, 1) : func.type.args[i] = typesystem.getTypeMap()[key]
-}
 </script>
 <template>
     <div style="display:flex;">
         <div style="padding: 12px;width: 50%;flex-shrink: 0">
             <NButton @click="clear">Clear Storage</NButton>
             <div v-for="(view,i) in database.views" :key="i"
-                 style="margin: 12px;padding: 8px;border: 1px solid gray;border-radius: 4px;overflow: auto">
+                 style="margin-top: 12px;padding: 8px;border: 1px solid gray;border-radius: 4px;overflow: auto">
                 <component
                         :is="Views[view.type].render"
                         :columnMap="database.columnMap"
@@ -70,15 +67,46 @@ const selectType = (key: string, func: FunctionDefine, i: number) => {
             <div>
                 <div style="font-weight: bold">Filter Functions</div>
                 <div style="font-size:12px;margin-bottom: 12px;font-family: 'JetBrains Mono',serif;padding: 8px;background: rgba(0,0,0,0.05);border-radius: 4px">
-                    <div v-for="(func) in typesystem.getFunctions()"
-                         style="">
-                        {{ `${func.name}` }}<span v-if="func.type.typeVars?.length">{{
-                            `<${func.type.typeVars?.map(v => `${v.name} extends ${typeToString(v.bound)}`).join(', ')}>`
-                        }}</span>{{
-                            `(${func.type.args.map(type => typeToString(type)).join(', ')})`
-                        }}
-                        {{ ' => ' }}
-                        {{ typeToString(func.type.rt) }}
+                    <div v-for="(func) in typesystem.getFunctions()">
+                        <span>{{ func.name }}</span><span v-if="func.type.typeVars?.length">
+                        <span class="keyword">{{ '<' }}</span>
+                        <span class="type-name">{{
+                            `${func.type.typeVars?.map(v => `${v.name} extends ${typeToString(v.bound)}`).join(', ')}`
+                            }}</span>
+                        <span class="keyword">{{ '>' }}</span>
+                        </span>
+                        <span>
+                            <span class="keyword">(</span>
+                            <span class="type-name">{{
+                                `${func.type.args.map(type => typeToString(type)).join(', ')}`
+                                }}</span>
+                            <span class="keyword">)</span>
+                        </span>
+                        <span class="keyword">{{ ' => ' }}</span>
+                        <span class="keyword">{{ typeToString(func.type.rt) }}</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div style="font-weight: bold">Property Functions</div>
+                <div style="font-size:12px;margin-bottom: 12px;font-family: 'JetBrains Mono',serif;padding: 8px;background: rgba(0,0,0,0.05);border-radius: 4px">
+                    <div v-for="(func) in typesystem.allProperties()">
+                        <span>{{ func.name }}</span><span v-if="func.type.typeVars?.length">
+                        <span class="keyword">{{ '<' }}</span>
+                        <span class="type-name">{{
+                                `${func.type.typeVars?.map(v => `${v.name} extends ${typeToString(v.bound)}`).join(', ')}`
+                            }}</span>
+                        <span class="keyword">{{ '>' }}</span>
+                        </span>
+                        <span>
+                            <span class="keyword">(</span>
+                            <span class="type-name">{{
+                                    `${func.type.args.map(type => typeToString(type)).join(', ')}`
+                                }}</span>
+                            <span class="keyword">)</span>
+                        </span>
+                        <span class="keyword">{{ ' => ' }}</span>
+                        <span class="keyword">{{ typeToString(func.type.rt) }}</span>
                     </div>
                 </div>
             </div>
@@ -87,4 +115,11 @@ const selectType = (key: string, func: FunctionDefine, i: number) => {
 </template>
 
 <style scoped>
+.keyword {
+    color: #a6a6a6;
+}
+
+.type-name {
+    color: coral;
+}
 </style>

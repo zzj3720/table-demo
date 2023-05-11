@@ -132,7 +132,7 @@ export type FunctionDefine = {
     id: string;
     type: FunctionTypeDefine;
     staticType: FunctionTypeDefine;
-    impl: string
+    impl: AnyFn
 }
 type PropertyDefine = {
     name: string;
@@ -180,7 +180,7 @@ export class Typesystem {
             name,
             type,
             staticType,
-            impl: impl.toString(),
+            impl,
         }
         this.functionMap[id] = func
     }
@@ -193,7 +193,7 @@ export class Typesystem {
             name,
             type,
             staticType,
-            impl: impl.toString(),
+            impl,
         }
         this.propertyMap[id] = property;
     }
@@ -327,6 +327,10 @@ export class Typesystem {
         return Object.values(this.define.value.function)
     }
 
+    allProperties() {
+        return Object.values(this.define.value.property)
+    }
+
     subst(context: Record<string, TType>, template: FunctionTypeDefine): FunctionTypeDefine {
         const subst = (type: TType): TType => {
             if (this.isPrimitive(type)) {
@@ -453,28 +457,28 @@ export const initFunction = (typesystem: Typesystem) => {
         args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
         rt: tBoolean()
     }, (value, target) => {
-        return Array.isArray(target) && target.includes(value);
+        return Array.isArray(target) && Array.isArray(value) && target.every(v => value.includes(v));
     })
     typesystem.defineFunction('Contains one of', {
         typeVars: [tTypeVar('options', tUnion([tString()]))],
         args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
         rt: tBoolean()
     }, (value, target) => {
-        return Array.isArray(target) && !target.includes(value);
+        return Array.isArray(target) && Array.isArray(value) && target.some(v => value.includes(v));
     })
     typesystem.defineFunction('Does not contains one of', {
         typeVars: [tTypeVar('options', tUnion([tString()]))],
         args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
         rt: tBoolean()
     }, (value, target) => {
-        return Array.isArray(target) && !target.includes(value);
+        return Array.isArray(target) && Array.isArray(value) && target.every(v => !value.includes(v));
     })
     typesystem.defineFunction('Does not contains all', {
         typeVars: [tTypeVar('options', tUnion([tString()]))],
         args: [tArray(tTypeRef('options')), tArray(tTypeRef('options'))],
         rt: tBoolean()
     }, (value, target) => {
-        return Array.isArray(target) && !target.includes(value);
+        return Array.isArray(target) && Array.isArray(value) && !target.every(v => value.includes(v));
     })
     typesystem.defineProperty('Length', {
         args: [tString()],
@@ -489,34 +493,34 @@ export const initFunction = (typesystem: Typesystem) => {
         args: [tDate],
         rt: tNumber()
     }, (value) => {
-        if (typeof value !== 'string') {
+        if (typeof value !== 'number') {
             return 0;
         }
-        return value.length;
+        return new Date(value).getDate();
     })
     typesystem.defineProperty('Day of week', {
         args: [tDate],
         rt: tNumber()
     }, (value) => {
-        if (typeof value !== 'string') {
+        if (typeof value !== 'number') {
             return 0;
         }
-        return value.length;
+        return new Date(value).getDay();
     })
     typesystem.defineProperty('Month of year', {
         args: [tDate],
         rt: tNumber()
     }, (value) => {
-        if (typeof value !== 'string') {
+        if (typeof value !== 'number') {
             return 0;
         }
-        return value.length;
+        return new Date(value).getMonth() + 1;
     })
     typesystem.defineProperty('Size', {
         args: [tArray(tUnknown())],
         rt: tNumber()
     }, (value) => {
-        if (typeof value !== 'string') {
+        if (!Array.isArray(value)) {
             return 0;
         }
         return value.length;

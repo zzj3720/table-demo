@@ -32,7 +32,7 @@ const map = {
 }
 const options = Object.entries(map).map(([key, value]) => ({label: value, value: key}));
 const addNewOptions = computed(() => {
-    return props.vars.map(v => ({label: v.name, key: v.name}))
+    return props.vars.map(v => ({label: v.name, key: v.id}))
 })
 const addNew = (name: string) => {
     props.data.push({

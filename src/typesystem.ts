@@ -372,15 +372,15 @@ export const tURL = typesystem.defineTrait('URL', [tString(), tUnknown()])
 export const tEmail = typesystem.defineTrait('Email', [tString(), tUnknown()])
 export const tPhone = typesystem.defineTrait('Phone', [tString(), tUnknown()])
 export const InputRenderList: { type: TType, render: any }[] = [];
-InputRenderList.push({type: tUnion([tUnknown()]), render: UnionInput})
 InputRenderList.push({type: tBoolean(), render: BooleanInput})
 InputRenderList.push({type: tDate, render: DateInput})
 InputRenderList.push({type: tURL, render: StringInput})
 InputRenderList.push({type: tPhone, render: StringInput})
 InputRenderList.push({type: tEmail, render: StringInput})
 InputRenderList.push({type: tNumber(), render: NumberInput})
-InputRenderList.push({type: tString(), render: StringInput})
 InputRenderList.push({type: tArray(tUnknown()), render: ArrayInput})
+InputRenderList.push({type: tUnion([tUnknown()]), render: UnionInput})
+InputRenderList.push({type: tString(), render: StringInput})
 export const getRenderByType = (type: TType) => {
     return InputRenderList.find(v => {
         // if()
@@ -452,7 +452,30 @@ typesystem.defineFunction('Is before', {
     ])],
     rt: tBoolean()
 }, (value, target) => {
-    return typeof value === 'number' && value == target;
+    let targetDate = new Date();
+    switch (target) {
+        case 'Today':
+            break;
+        case 'Yesterday':
+            targetDate.setDate(targetDate.getDate() - 1)
+            break;
+        case '2 days ago':
+            targetDate.setDate(targetDate.getDate() - 2)
+            break;
+        case '3 days ago':
+            targetDate.setDate(targetDate.getDate() - 3)
+            break;
+        case '4 days ago':
+            targetDate.setDate(targetDate.getDate() - 4)
+            break;
+        case '5 days ago':
+            targetDate.setDate(targetDate.getDate() - 5)
+            break;
+        case 'Last week':
+            targetDate.setDate(targetDate.getDate() - targetDate.getDay())
+            break;
+    }
+    return typeof value === 'number' && value < +targetDate;
 })
 typesystem.defineFunction('Is inside', {
     typeVars: [tTypeVar('options', tUnion([tString()]))],

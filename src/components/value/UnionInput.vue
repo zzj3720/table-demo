@@ -13,7 +13,8 @@ const props = defineProps<{
     type: TUnion;
 }>();
 const options = computed(() => {
-    return props.type.list.map(v => {
+    console.log(props.type)
+    return props.type.list?.map(v => {
         if (v.type !== 'string' || !v.literal) {
             return
         }
